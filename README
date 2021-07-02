@@ -1,6 +1,12 @@
 * bionic-jpeg, an example of using libhybris to access Android
   libraries from Ubuntu
 
+Fork Note: Upstream is on Launchpad: https://code.launchpad.net/~john.mcaleely/bionic-jpeg/trunk. Changes:
+
+- Upgrade to jpeg-9 library
+- libhybris call fixes in jpeg-bridge
+- removal of unused files
+
 A port of the Independent JPEG Group's JPEG library, such that the
 core library is an Android binary, and the client utilities are Ubuntu
 binaries. Uses libHybris as a bridge between the two worlds.
