@@ -2,7 +2,7 @@
  * jdmarker.c
  *
  * Copyright (C) 1991-1998, Thomas G. Lane.
- * Modified 2009-2012 by Guido Vollbeding.
+ * Modified 2009-2019 by Guido Vollbeding.
  * This file is part of the Independent JPEG Group's software.
  * For conditions of distribution and use, see the accompanying README file.
  *
@@ -269,8 +269,8 @@ get_sof (j_decompress_ptr cinfo, boolean is_baseline, boolean is_prog,
   /* We don't support files in which the image height is initially specified */
   /* as 0 and is later redefined by DNL.  As long as we have to check that,  */
   /* might as well have a general sanity check. */
-  if (cinfo->image_height <= 0 || cinfo->image_width <= 0
-      || cinfo->num_components <= 0)
+  if (cinfo->image_height <= 0 || cinfo->image_width <= 0 ||
+      cinfo->num_components <= 0)
     ERREXIT(cinfo, JERR_EMPTY_IMAGE);
 
   if (length != (cinfo->num_components * 3))
@@ -350,6 +350,9 @@ get_sos (j_decompress_ptr cinfo)
 
     /* Detect the case where component id's are not unique, and, if so, */
     /* create a fake component id using the same logic as in get_sof.   */
+    /* Note:  This also ensures that all of the SOF components are      */
+    /* referenced in the single scan case, which prevents access to     */
+    /* uninitialized memory in later decoding stages. */
     for (ci = 0; ci < i; ci++) {
       if (c == cinfo->cur_comp_info[ci]->component_id) {
 	c = cinfo->cur_comp_info[0]->component_id;
@@ -512,7 +515,8 @@ get_dht (j_decompress_ptr cinfo)
       *htblptr = jpeg_alloc_huff_table((j_common_ptr) cinfo);
   
     MEMCOPY((*htblptr)->bits, bits, SIZEOF((*htblptr)->bits));
-    MEMCOPY((*htblptr)->huffval, huffval, SIZEOF((*htblptr)->huffval));
+    if (count > 0)
+      MEMCOPY((*htblptr)->huffval, huffval, count * SIZEOF(UINT8));
   }
 
   if (length != 0)
@@ -572,14 +576,14 @@ get_dqt (j_decompress_ptr cinfo)
 	count = DCTSIZE2;
     }
 
-    switch (count) {
+    switch ((int) count) {
     case (2*2): natural_order = jpeg_natural_order2; break;
     case (3*3): natural_order = jpeg_natural_order3; break;
     case (4*4): natural_order = jpeg_natural_order4; break;
     case (5*5): natural_order = jpeg_natural_order5; break;
     case (6*6): natural_order = jpeg_natural_order6; break;
     case (7*7): natural_order = jpeg_natural_order7; break;
-    default:    natural_order = jpeg_natural_order;  break;
+    default:    natural_order = jpeg_natural_order;
     }
 
     for (i = 0; i < count; i++) {
@@ -735,12 +739,13 @@ examine_app0 (j_decompress_ptr cinfo, JOCTET FAR * data,
     cinfo->X_density = (GETJOCTET(data[8]) << 8) + GETJOCTET(data[9]);
     cinfo->Y_density = (GETJOCTET(data[10]) << 8) + GETJOCTET(data[11]);
     /* Check version.
-     * Major version must be 1, anything else signals an incompatible change.
+     * Major version must be 1 or 2, anything else signals an incompatible
+     * change.
      * (We used to treat this as an error, but now it's a nonfatal warning,
      * because some bozo at Hijaak couldn't read the spec.)
      * Minor version should be 0..2, but process anyway if newer.
      */
-    if (cinfo->JFIF_major_version != 1)
+    if (cinfo->JFIF_major_version != 1 && cinfo->JFIF_major_version != 2)
       WARNMS2(cinfo, JWRN_JFIF_MAJOR,
 	      cinfo->JFIF_major_version, cinfo->JFIF_minor_version);
     /* Generate trace messages */
@@ -778,7 +783,6 @@ examine_app0 (j_decompress_ptr cinfo, JOCTET FAR * data,
     default:
       TRACEMS2(cinfo, 1, JTRC_JFIF_EXTENSION,
 	       GETJOCTET(data[5]), (int) totallen);
-      break;
     }
   } else {
     /* Start of APP0 does not match "JFIF" or "JFXX", or too short */
@@ -852,7 +856,6 @@ get_interesting_appn (j_decompress_ptr cinfo)
   default:
     /* can't get here unless jpeg_save_markers chooses wrong processor */
     ERREXIT1(cinfo, JERR_UNKNOWN_MARKER, cinfo->unread_marker);
-    break;
   }
 
   /* skip any remaining data -- could be lots */
@@ -958,7 +961,6 @@ save_marker (j_decompress_ptr cinfo)
   default:
     TRACEMS2(cinfo, 1, JTRC_MISC_MARKER, cinfo->unread_marker,
 	     (int) (data_length + length));
-    break;
   }
 
   /* skip any remaining data -- could be lots */
@@ -1234,7 +1236,6 @@ read_markers (j_decompress_ptr cinfo)
        * ought to change!
        */
       ERREXIT1(cinfo, JERR_UNKNOWN_MARKER, cinfo->unread_marker);
-      break;
     }
     /* Successfully processed marker, so reset state variable */
     cinfo->unread_marker = 0;
@@ -1410,9 +1411,8 @@ jinit_marker_reader (j_decompress_ptr cinfo)
   int i;
 
   /* Create subobject in permanent pool */
-  marker = (my_marker_ptr)
-    (*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
-				SIZEOF(my_marker_reader));
+  marker = (my_marker_ptr) (*cinfo->mem->alloc_small)
+    ((j_common_ptr) cinfo, JPOOL_PERMANENT, SIZEOF(my_marker_reader));
   cinfo->marker = &marker->pub;
   /* Initialize public method pointers */
   marker->pub.reset_marker_reader = reset_marker_reader;
