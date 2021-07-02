@@ -1,13 +1,12 @@
+#define RTLD_LAZY     0x00001
+#include <hybris/common/dlfcn.h>
+#include <hybris/common/binding.h>
+
 #include <stddef.h>
 #include <stdio.h>
 
-#include <hybris/common/binding.h>
-
 #include <jinclude.h>
 #include <jpeglib.h>
-
-#include <hybris/common/binding.h>
-
 
 HYBRIS_LIBRARY_INITIALIZE(libjpeg, "libjpeg2.so")
 

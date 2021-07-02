@@ -9,8 +9,8 @@
 ACLOCAL_AMFLAGS = -I autotools/m4
 
 # Test support files
-TESTFILES= testorig.jpg testimg.ppm testimg.bmp testimg.jpg testprog.jpg \
-        testimgp.jpg
+TESTFILES= testorig.jpg testimg.ppm testimg.gif testimg.bmp testimg.jpg \
+        testprog.jpg testimgp.jpg
 
 # Executables to build
 bin_PROGRAMS = cjpeg djpeg jpegtran rdjpgcom wrjpgcom
@@ -32,8 +32,8 @@ wrjpgcom_SOURCES = ../jpeg-9/wrjpgcom.c
 
 
 # Files to be cleaned
-CLEANFILES = testout.ppm testout.bmp testout.jpg testoutp.ppm testoutp.jpg \
-        testoutt.jpg
+CLEANFILES = testout.ppm testout.gif testout.bmp testout.jpg testoutp.ppm \
+        testoutp.jpg testoutt.jpg
 
 
 # Run tests

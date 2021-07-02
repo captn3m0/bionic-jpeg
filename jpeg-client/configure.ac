@@ -5,7 +5,7 @@
 # Configure script for IJG libjpeg
 #
 
-AC_INIT([jpeg-client], [9.0.0])
+AC_INIT([jpeg-client],[9.4.0])
 
 # Directory where autotools helper scripts lives.
 AC_CONFIG_AUX_DIR([autotools])
@@ -16,7 +16,7 @@ AC_CANONICAL_TARGET
 
 # Initialize Automake
 # Don't require all the GNU mandated files
-AM_INIT_AUTOMAKE([-Wall -Werror no-dist foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror no-dist foreign subdir-objects])
 
 # Make --enable-silent-rules the default.
 # To get verbose build output you may configure
@@ -30,17 +30,11 @@ AM_MAINTAINER_MODE
 
 # Check for programs
 AC_PROG_CC
-AC_PROG_CC_STDC
 AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_PROG_LN_S
 AM_PROG_AR
-
-
-# Configure libtool
-AC_LIBTOOL_WIN32_DLL
-AC_PROG_LIBTOOL
 
 # Extract the library version IDs from jpeglib.h.
 AC_MSG_CHECKING([libjpeg version number])

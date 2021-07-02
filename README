@@ -69,10 +69,12 @@ verbatim.
 
   * Now configure and make the samples
     # cd jpeg-bridge
+    # autoreconf
     # ./configure --with-hybris-internal-include-path=/path/to/libhybris/source/hybris/include/
     # make
 
     # cd jpeg-client
+    # autoreconf
     # ./configure
     # make
     
