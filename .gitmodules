@@ -1,0 +1,3 @@
+[submodule "jpeg-9"]
+	path = jpeg-9
+	url = https://github.com/mackyle/jpeg.git

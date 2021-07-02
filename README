@@ -53,6 +53,9 @@ verbatim.
   Note that libjpeg has been renamed to libjpeg2 in the build scripts,
   to avoid a collision with existing libjpeg installs
 
+  * Clone this repository with submodules
+    $ git clone --recurse-submodules https://github.com/captn3m0/bionic-jpeg
+
   * Get an Android NDK install, and build the android library
     $ cd jpeg-library
     $ <path-to-ndk>/ndk-build
